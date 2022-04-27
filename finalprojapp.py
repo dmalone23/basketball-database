@@ -1,5 +1,6 @@
 import pymysql
 
+#CREATE functions
 def create_player(cursor):
     positions = ['PG', 'SG', 'SF', 'PF', 'C']
     valid_input = False
@@ -21,7 +22,7 @@ def create_player(cursor):
             else:
                 break
         while True:
-            hand = input("Enter the new player's handedness: ").upper()
+            hand = input("Enter the new player's handedness [L, R]: ").upper()
             if hand not in ['L', 'R']:
                 print('Invalid handedness! Try again!')
             else:
@@ -31,22 +32,44 @@ def create_player(cursor):
         valid_input = True
 
     cursor.callproc("createPlayer", (fname, lname, height, weight, ppos, spos, hand, dob, college))
+    print('Player created!')
 
 def create_team(cursor):
     valid_input = False
     while not valid_input:
-        new_name = input("Enter the team's new name: ")
-        new_city = input("Enter the team's new city: ")
+        new_team_name = input("Enter the team's new name: ")
+        new_team_city = input("Enter the team's new city: ")
         while True:
             new_state = input("Enter the team's new state (two-character abbreviation): ")
             if len(new_state) != 2:
                 print('Please use a two-character abbreviation!')
             else:
                 break
-        new_seed = int(input("Enter the team's new seed: "))
+        new_team_seed = int(input("Enter the team's new seed: "))
+        new_mascot_name = input("Enter the team's new mascot: ")
+        new_coach_name = input("Enter the team's new head coach: ")
+        new_coach_age = int(input("Enter the age of this new head coach: "))
+        new_coach_exp = int(input("Enter the years of experience of this new head coach: "))
+        new_stadium_name = input("Enter the team's new stadium name: ").title()
+        new_stadium_capacity = int(input("Enter the capacity of this new stadium: "))
+        new_gleague_name = input("Enter the name of the team's new GLeague affiliate: ")
+        new_gleague_city = input("Enter the city of this new G-League affiliate: ")
+        while True:
+            new_gleague_state = input("Enter the state of this new G-League affiliate (two-character abbreviation): ")
+            if len(new_gleague_state) != 2:
+                print('Please use the two-character abbreviation of the state! Try again.')
+            else:
+                break
+        new_gleague_seed = int(input("Enter the seed of this new G-League affiliate: "))
+
         valid_input = True
 
-    cursor.callproc("createTeam", (new_name.title(), new_city.title(), new_state.upper(), new_seed))
+    cursor.callproc("createTeam", (new_team_name.title(), new_team_city.title(), new_state.upper(), new_team_seed,
+    new_mascot_name.title(), new_coach_name.title(), new_coach_age, new_coach_exp, new_stadium_name.title(), 
+    new_stadium_capacity, new_gleague_name.title(), new_gleague_city.title(), new_gleague_state.upper(), 
+    new_gleague_seed))
+
+    print('Team created!')
 
 def create_draft(cursor):
     valid_input = False
@@ -58,13 +81,11 @@ def create_draft(cursor):
         for row in cursor:
             valid_players.append(row['id'])
             print("ID:", row['id'], "First Name:", row['fname'], "Last Name:", row['lname'])
-        print(valid_players)
         print('\nValid Team Names: ')
         cursor.execute("SELECT name from team")
         for row in cursor:
             valid_teams.append(row['name'])
             print("Team Name:", row['name'])
-        print(valid_teams)
         while True:
             new_player_id = int(input('Enter a valid player ID (listed above): '))
             if new_player_id not in valid_players:
@@ -89,7 +110,9 @@ def create_draft(cursor):
         new_year = int(input('Enter the draft year: '))
         valid_input = True
     cursor.callproc('createDraft', (new_player_id, new_team, new_round, new_pick, new_year))
+    print('Draft entry created!')
 
+#UPDATE functions
 def update_mascot(cursor):
     valid_mascots = []
     valid_input = False
@@ -126,6 +149,7 @@ def update_homestadium(cursor):
         new_capacity = int(input('Enter the new capacity for this stadium: '))
         valid_input = True
     cursor.callproc('updateHomestadium', (new_id, new_name.title(), new_capacity))
+    print('Home Stadium updated!')
 
 def update_headcoach(cursor):
     valid_coaches = []
@@ -146,6 +170,7 @@ def update_headcoach(cursor):
         new_experience = int(input('Enter the new years of experience for this head coach: '))
         valid_input = True
     cursor.callproc('updateHeadcoach', (new_id, new_name.title(), new_age, new_experience))
+    print('Head coach updated!')
 
 def update_gleague(cursor):
     valid_gleagues = []
@@ -172,8 +197,9 @@ def update_gleague(cursor):
         new_seed = int(input('Enter the new seed for this affiliate: '))
         valid_input = True
     cursor.callproc('updateGleague', (new_id, new_name.title(), new_city.title(), new_state.upper(), new_seed))
+    print('G-League Affiliate updated!')
 
-
+#DELETE functions
 def delete_player(cursor):
     valid_players = []
     valid_input = False
@@ -189,7 +215,8 @@ def delete_player(cursor):
             else:
                 break
         valid_input = True
-    cursor.execute("DELETE from player where id =%s", delete_id)
+    cursor.callproc("deletePlayer", (delete_id,))
+    print('Player deleted!')
 
 def delete_team(cursor):
     valid_teams = []
@@ -206,7 +233,8 @@ def delete_team(cursor):
             else:
                 break
         valid_input = True
-    cursor.execute("DELETE from team where name =%s", delete_name.title())
+    cursor.callproc("deleteTeam", (delete_name,))
+    print('Team deleted!')
 
 def delete_draft(cursor):
     valid_draft = []
@@ -224,8 +252,28 @@ def delete_draft(cursor):
             else:
                 break
         valid_input = True
-    cursor.execute("DELETE from draft where id =%s", delete_id)
+    cursor.callproc("deleteDraft", (delete_id, ))
+    print('Draft entry deleted!')
 
+# READ functions
+def read_full_team(cursor):
+    valid_teams = []
+    valid_input = False
+    while not valid_input:
+        cursor.execute('SELECT name from team')
+        for row in cursor:
+            valid_teams.append(row['name'])
+            print("Name:", row['name'])
+        while True:
+            full_team_name = input('Enter the name of the team you would like to fully view: ')
+            if full_team_name not in valid_teams:
+                print('Invalid name, please try again.')
+            else:
+                break
+        valid_input = True
+    cursor.callproc("readFullTeam", (full_team_name, ))
+    for row in cursor.fetchall():
+        print(row)
 
 def read_tables(cursor):
     tables = []
@@ -233,6 +281,7 @@ def read_tables(cursor):
 
     for table_name in cursor.fetchall():
         tables.append(table_name['Tables_in_nbadraft'])
+    tables.append('full team overview')
     
     print("Tables in the database: ", tables)
     while True:
@@ -241,10 +290,14 @@ def read_tables(cursor):
             print('Invalid table specified! Please try again.')
         else:
             break
-    cursor.execute("SELECT * from " + str(read_table))
-    for row in cursor.fetchall():
-        print(row)
+    if read_table.lower() == 'full team overview':
+        read_full_team(cursor)
+    else:
+        cursor.execute("SELECT * from " + str(read_table))
+        for row in cursor.fetchall():
+            print(row)
 
+#Beginning of program
 username = input("Enter your username: ")
 pword = input("Enter your password: ")
 
@@ -257,18 +310,18 @@ connection = pymysql.connect(host='localhost',
 
 with connection:
     with connection.cursor() as cursor:
-        print("Welcome to the NBA Draft Database!")
+        print("Welcome to the NBA Draft Database!\n")
         while True:
             while True:
                 init_input = input("What would you like to do? [Create, Read, Update, Delete, Exit]: ")
-                if init_input.lower() not in ['create', 'read', 'update', 'delete', 'exit']:
+                if init_input.lower() not in ['create', 'read', 'update', 'delete', 'exit', 'c', 'r', 'u', 'd', 'e']:
                     print("I don't understand that command. Please try again.")
                 else:
                     break
-            if init_input.lower() == 'exit':
+            if init_input.lower() in ['exit', 'e']:
                 print("Goodbye!")
                 break
-            elif init_input.lower() == 'create':
+            elif init_input.lower() in ['create', 'c']:
                 while True:
                     create_input = input("What entity would you like to create? [Player, Team, Draft]: ")
                     if create_input.lower() not in ['player', 'team', 'draft']:
@@ -282,9 +335,9 @@ with connection:
                     create_team(cursor)
                 elif create_input == 'draft':
                     create_draft(cursor)
-            elif init_input.lower() == 'read':
+            elif init_input.lower() in ['read', 'r']:
                 read_tables(cursor)
-            elif init_input.lower() == 'update':
+            elif init_input.lower() in ['update', 'u']:
                 while True:
                     update_input = input("What entity would you like to update? [Home Stadium, Mascot, Head Coach, G-League Affiliate]: ")
                     if update_input.lower() not in ['home stadium', 'mascot', 'head coach', 'g-league affiliate']:
@@ -303,7 +356,7 @@ with connection:
                 elif update_input.lower() == 'g-league affiliate':
                     update_gleague(cursor)
                     connection.commit()
-            elif init_input.lower() == 'delete':
+            elif init_input.lower() in ['delete', 'd']:
                 while True:
                     delete_input = input("What entity would you like to delete? [Player, Team, Draft]: ")
                     if delete_input not in ['player', 'team', 'draft']:

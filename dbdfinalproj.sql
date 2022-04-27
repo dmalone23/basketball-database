@@ -14,7 +14,17 @@ CREATE PROCEDURE createTeam(
   new_name VARCHAR(32),
   new_city VARCHAR(32),
   new_state VARCHAR(2),
-  new_seed INT
+  new_seed INT,
+  new_mascot_name VARCHAR(32),
+  new_coach_name VARCHAR(32),
+  new_coach_age INT,
+  new_coach_exp INT,
+  new_stadium_name VARCHAR(32),
+  new_stadium_capacity INT,
+  new_gleague_name VARCHAR(32),
+  new_gleague_city VARCHAR(32),
+  new_gleague_state VARCHAR(2),
+  new_gleague_seed INT
   )
   MODIFIES SQL DATA
 BEGIN
@@ -23,34 +33,11 @@ BEGIN
       VALUES (new_name, new_city, new_state, new_seed);
   END IF;
   
-  -- IF NOT EXISTS(SELECT id FROM headcoach WHERE name = new_coach_name) THEN
---     INSERT INTO headcoach(name, age, experience, team) VALUES (new_coach_name, new_coach_age, new_coach_experience, new_name);
---   END IF;
---   UPDATE headcoach
---     SET headcoach.team = new_name
---     WHERE headcoach.id = (SELECT id from headcoach where name = new_coach_name);
---     
---   IF NOT EXISTS(SELECT name FROM mascot WHERE name = new_mascot_name) THEN
---     INSERT INTO mascot(name, team) VALUES (new_mascot_name, new_name);
---   END IF;
---   UPDATE mascot
---     SET mascot.team = new_name
---     WHERE mascot.name = new_mascot_name;
-
---   IF NOT EXISTS(SELECT id FROM homestadium WHERE name = new_stadium_name) THEN
---     INSERT INTO homestadium(name, capacity, team) VALUES (new_stadium_name, new_stadium_capacity, new_name);
---   END IF;
---   UPDATE homestadium
---     SET homestadium.team = new_name
---     WHERE homestadium.id = (SELECT id from homestadium where name = new_stadium_name);
-
---   IF NOT EXISTS(SELECT name FROM gleague_aff WHERE name = new_gleague_aff_name) THEN
---     INSERT INTO gleague_aff(name, city, state, seed, team) VALUES (new_gleague_aff_name, new_gleague_aff_city, new_gleague_aff_state, new_gleague_aff_seed, new_name);
---   END IF;
---   UPDATE gleague_aff
---     SET gleague_aff.team = new_name
---     WHERE gleague_aff.name = new_gleague_aff_name;
-    
+  INSERT INTO mascot(name, team) VALUES (new_mascot_name, new_name);
+  INSERT INTO headcoach(name, age, experience, team) VALUES 
+  (new_coach_name, new_coach_age, new_coach_exp, new_name);
+  INSERT INTO homestadium(name, capacity, team) VALUES (new_stadium_name, new_stadium_capacity, new_name);
+  INSERT INTO gleague_aff(name, city, state, seed, team) VALUES (new_gleague_name, new_gleague_city, new_gleague_state, new_gleague_seed, new_name);
 END ;;
 DELIMITER ;
 
@@ -97,28 +84,16 @@ BEGIN
 END ;;
 DELIMITER ;
 
--- DELIMITER ;;
--- CREATE PROCEDURE updatePlayer(
--- 	new_player_id INT,
---     new_fname VARCHAR(32),
---     new_lname VARCHAR(32),
---     new_height INT,
---     new_weight INT,
---     new_primary_pos ENUM ('PG', 'SG', 'SF', 'PF', 'C'),
---     new_secondary_pos ENUM ('PG', 'SG', 'SF', 'PF', 'C'),
---     new_handedness ENUM ('L', 'R'),
---     new_dob DATE,
---     new_college VARCHAR(32)
---   )
---   MODIFIES SQL DATA
--- BEGIN
--- 	UPDATE player 
---     SET fname = new_fname, lname = new_lname, height = new_height, weight = new_weight, 
---     primary_pos = new_primary_pos, secondary_pos = new_secondary_pos, handedness = new_handedness, 
---     dob = new_dob, college = new_college
---     WHERE player_id = new_player_id;
--- END ;;
--- DELIMITER ;
+DELIMITER ;;
+CREATE PROCEDURE deletePlayer(
+    del_player_id VARCHAR(32)
+  )
+  MODIFIES SQL DATA
+BEGIN
+	DELETE FROM player where id = del_player_id;
+END ;;
+
+DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS draft
 	(id INT PRIMARY KEY auto_increment,
@@ -148,6 +123,17 @@ BEGIN
       VALUES (new_player_id, new_team, new_round, new_pick, new_year);
   END IF;
 END ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE deleteDraft(
+    del_draft_id VARCHAR(32)
+  )
+  MODIFIES SQL DATA
+BEGIN
+	DELETE FROM draft where id = del_draft_id;
+END ;;
+
 DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS mascot
@@ -194,8 +180,6 @@ BEGIN
 END ;;
 DELIMITER ;
 
-
-    
 CREATE TABLE IF NOT EXISTS homestadium
 	(id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(64) NOT NULL,
@@ -218,7 +202,7 @@ END ;;
 DELIMITER ;
     
 CREATE TABLE IF NOT EXISTS gleague_aff
-	(id INT PRIMARY KEY,
+	(id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(32),
     city VARCHAR(32) NOT NULL,
     state VARCHAR(2) NOT NULL,
@@ -244,7 +228,7 @@ DELIMITER ;
     
 DELIMITER ;;
 CREATE PROCEDURE readFullTeam(
-    full_team_name VARCHAR(32)
+    IN full_team_name VARCHAR(32)
   )
   READS SQL DATA
 BEGIN
@@ -261,24 +245,23 @@ END ;;
 DELIMITER ;
 
 CALL createPlayer('Lebron', 'James', 80, 400, 'PG', 'SG', 'L', '2001-10-08', 'Northeastern');
-CALL createTeam('Bobcats', 'Boston', 'MA', 8);
+CALL createPlayer('Michael', 'Jordan', 99, 200, 'SG', 'SF', 'R', '2002-06-15', 'MIT');
+CALL createTeam('Bobcats', 'Boston', 'MA', 8, 'Peter', 'Coach J', 5, 10, 'Arena 5', 500, 'gleague team', 'Boston', 'MA', 4);
+CALL createTeam('Warriors', 'Queens', 'NY', 1, 'Peter', 'Coach JL', 5, 10, 'Arena 6', 590, 'gleague team2', 'Boston', 'MA', 4);
 CALL createDraft(1, 'Bobcats', 1, 1, 2003);
+CALL createDraft(2, 'Warriors', 2, 5, 2008);
 
-INSERT INTO gleague_aff VALUES (1, 'Little Bobcats', 'Cambridge', 'MA', 2, 'Bobcats');
-INSERT INTO mascot VALUES (1, 'Benny the Bull', 'Bobcats');
-INSERT INTO homestadium VALUES (1, 'Arena 5', 200, 'Bobcats');
-INSERT INTO headcoach VALUES (1, 'Coach K', 40, 3, 'Bobcats');
+-- INSERT INTO gleague_aff VALUES (1, 'Little Bobcats', 'Cambridge', 'MA', 2, 'Bobcats');
+-- INSERT INTO mascot VALUES (1, 'Benny the Bull', 'Bobcats');
+-- INSERT INTO homestadium VALUES (1, 'Arena 5', 200, 'Bobcats');
+-- INSERT INTO headcoach VALUES (1, 'Coach K', 40, 3, 'Bobcats');
+-- INSERT INTO gleague_aff VALUES (2, 'Wacky Warriors', 'Akron', 'OH', 2, 'Warriors');
+-- INSERT INTO mascot VALUES (2, 'Chimchar', 'Warriors');
+-- INSERT INTO homestadium VALUES (2, 'Fire Stadium', 5000, 'Warriors');
+-- INSERT INTO headcoach VALUES (2, 'Bobby Jones', 47, 5, 'Warriors');
 
--- CALL updateMascot(1, 'Buddy the Bull');
-
--- CALL updateHomestadium(1, 'Arena 6', 3000);
-
--- CALL deleteTeam('Bobcats');
-
-select * from player;
-select * from team;
-select * from draft;
 select * from mascot;
 select * from homestadium;
 select * from headcoach;
 select * from gleague_aff;
+
