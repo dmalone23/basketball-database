@@ -281,3 +281,4 @@ select * from draft;
 select * from mascot;
 select * from homestadium;
 select * from headcoach;
+select * from gleague_aff;
