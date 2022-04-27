@@ -355,8 +355,10 @@ with connection:
                     connection.commit()
                 elif create_input == 'team':
                     create_team(cursor)
+                    connection.commit()
                 elif create_input == 'draft':
                     create_draft(cursor)
+                    connection.commit()
             elif init_input.lower() in ['read', 'r']:
                 read_tables(cursor)
             elif init_input.lower() in ['update', 'u']:
