@@ -1,3 +1,4 @@
+import getpass
 import pymysql
 
 #CREATE functions
@@ -321,7 +322,7 @@ def read_tables(cursor):
 
 #Beginning of program
 username = input("Enter your username: ")
-pword = input("Enter your password: ")
+pword = getpass.getpass(prompt='Enter your password: ')
 
 # Connect to the database
 connection = pymysql.connect(host='localhost',
