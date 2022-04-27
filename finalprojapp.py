@@ -275,6 +275,25 @@ def read_full_team(cursor):
     for row in cursor.fetchall():
         print(row)
 
+def read_full_draft(cursor):
+    valid_drafts = []
+    valid_input = False
+    while not valid_input:
+        cursor.execute('SELECT * from draft')
+        for row in cursor:
+            valid_drafts.append(row['id'])
+            print(row)
+        while True:
+            full_draft_id = int(input('Enter the id of the draft entry you would like to fully view: '))
+            if full_draft_id not in valid_drafts:
+                print('Invalid id, please try again.')
+            else:
+                break
+        valid_input = True
+    cursor.callproc("readFullDraft", (full_draft_id, ))
+    for row in cursor.fetchall():
+        print(row)
+
 def read_tables(cursor):
     tables = []
     cursor.execute("SHOW TABLES")
@@ -282,6 +301,7 @@ def read_tables(cursor):
     for table_name in cursor.fetchall():
         tables.append(table_name['Tables_in_nbadraft'])
     tables.append('full team overview')
+    tables.append('full draft overview')
     
     print("Tables in the database: ", tables)
     while True:
@@ -292,6 +312,8 @@ def read_tables(cursor):
             break
     if read_table.lower() == 'full team overview':
         read_full_team(cursor)
+    elif read_table.lower() == 'full draft overview':
+        read_full_draft(cursor)
     else:
         cursor.execute("SELECT * from " + str(read_table))
         for row in cursor.fetchall():

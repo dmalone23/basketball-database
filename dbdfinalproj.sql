@@ -244,24 +244,21 @@ BEGIN
 END ;;
 DELIMITER ;
 
+DELIMITER ;;
+CREATE PROCEDURE readFullDraft(
+    IN full_draft_id INT
+  )
+  READS SQL DATA
+BEGIN
+	select draft.id, player_id, fname, lname, team, round, pick, year from draft inner join player on
+    draft.player_id = player.id
+    where draft.id = full_draft_id;
+END ;;
+DELIMITER ;
+
 CALL createPlayer('Lebron', 'James', 80, 400, 'PG', 'SG', 'L', '2001-10-08', 'Northeastern');
 CALL createPlayer('Michael', 'Jordan', 99, 200, 'SG', 'SF', 'R', '2002-06-15', 'MIT');
-CALL createTeam('Bobcats', 'Boston', 'MA', 8, 'Peter', 'Coach J', 5, 10, 'Arena 5', 500, 'gleague team', 'Boston', 'MA', 4);
-CALL createTeam('Warriors', 'Queens', 'NY', 1, 'Peter', 'Coach JL', 5, 10, 'Arena 6', 590, 'gleague team2', 'Boston', 'MA', 4);
+CALL createTeam('Bobcats', 'Boston', 'MA', 8, 'Peter Griffin', 'Coach J', 55, 10, 'Arena 5', 500, 'Bucks', 'Boston', 'MA', 4);
+CALL createTeam('Warriors', 'Queens', 'NY', 1, 'Batman', 'Coach W', 29, 1, 'Arena Z', 590, 'Tanks', 'Queens', 'NY', 3);
 CALL createDraft(1, 'Bobcats', 1, 1, 2003);
 CALL createDraft(2, 'Warriors', 2, 5, 2008);
-
--- INSERT INTO gleague_aff VALUES (1, 'Little Bobcats', 'Cambridge', 'MA', 2, 'Bobcats');
--- INSERT INTO mascot VALUES (1, 'Benny the Bull', 'Bobcats');
--- INSERT INTO homestadium VALUES (1, 'Arena 5', 200, 'Bobcats');
--- INSERT INTO headcoach VALUES (1, 'Coach K', 40, 3, 'Bobcats');
--- INSERT INTO gleague_aff VALUES (2, 'Wacky Warriors', 'Akron', 'OH', 2, 'Warriors');
--- INSERT INTO mascot VALUES (2, 'Chimchar', 'Warriors');
--- INSERT INTO homestadium VALUES (2, 'Fire Stadium', 5000, 'Warriors');
--- INSERT INTO headcoach VALUES (2, 'Bobby Jones', 47, 5, 'Warriors');
-
-select * from mascot;
-select * from homestadium;
-select * from headcoach;
-select * from gleague_aff;
-
